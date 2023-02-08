@@ -1,12 +1,14 @@
+using MiddlewareDemo;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddControllers();
-
+builder.Services.AddTransient<JokeMiddleware>();
+//builder.Services.AddTransient<DadJokeMiddleware>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,8 +20,11 @@ if(app.Environment.IsDevelopment())
         await next();
         await context.Response.WriteAsync($"After Request {Environment.NewLine}");
     });
+    app.UseJokeMiddleware();
+    app.UseDadJokeMiddleware();
     app.Map("/first", FirstBranch);
     app.Map("/second", SecondBranch);
+   
     app.Run(async context =>
     {
        await context.Response.WriteAsync($"Hello Readers!! {Environment.NewLine}");
